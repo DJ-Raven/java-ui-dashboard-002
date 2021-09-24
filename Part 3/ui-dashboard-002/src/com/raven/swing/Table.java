@@ -61,7 +61,6 @@ public class Table extends JTable {
 
     @Override
     public Component prepareRenderer(TableCellRenderer tcr, int i, int i1) {
-
         if (i1 == 0) {
             Icon icon = (Icon) getValueAt(i, 0);
             TableCell_Image cell = new TableCell_Image(icon);
@@ -89,6 +88,10 @@ public class Table extends JTable {
         for (int i = 0; i < getRowCount(); i++) {
             int row = i;
             Rectangle r = getCellRect(row, 0, true);
+            if (isRowSelected(i)) {
+                g2.setColor(new Color(17, 164, 232));
+                g2.drawRect(margin, r.getLocation().y + margin, getWidth() - margin * 2, rowHeight - space);
+            }
             g2.drawImage(imageShadow, 0, r.getLocation().y, null);
             g2.setColor(new Color(255, 109, 109));
             g2.fillRect(margin, r.getLocation().y + margin, 3, rowHeight - space);
