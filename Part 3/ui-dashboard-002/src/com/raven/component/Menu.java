@@ -24,7 +24,6 @@ public class Menu extends javax.swing.JPanel {
 
     public Menu() {
         initComponents();
-        setOpaque(false);
         listMenu1.setOpaque(false);
         init();
     }

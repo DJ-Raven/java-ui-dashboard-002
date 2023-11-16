@@ -5,11 +5,14 @@ import com.raven.event.EventMenuSelected;
 import com.raven.form.Form_1;
 import com.raven.form.Form_2;
 import com.raven.form.MainForm;
+import com.raven.swing.WindowSnapshots;
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.JLayeredPane;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import net.miginfocom.swing.MigLayout;
 import org.jdesktop.animation.timing.Animator;
@@ -22,18 +25,22 @@ public class Main extends javax.swing.JFrame {
     private final MainForm main;
     private final MenuLayout menu;
     private final Animator animator;
+    private final WindowSnapshots windowSnapshots;
 
     public Main() {
         initComponents();
         layout = new MigLayout("fill", "0[fill]0", "0[fill]0");
         main = new MainForm();
         menu = new MenuLayout();
+        windowSnapshots = new WindowSnapshots(Main.this);
         menu.getMenu().initMoving(Main.this);
         main.initMoving(Main.this);
-        mainPanel.setLayer(menu, JLayeredPane.POPUP_LAYER);
-        mainPanel.setLayout(layout);
+        mainPanel.setLayout(new BorderLayout());
         mainPanel.add(main);
-        mainPanel.add(menu, "pos -215 0 100% 100%", 0);
+        JPanel glassPanel = new JPanel(layout);
+        glassPanel.setOpaque(false);
+        glassPanel.add(menu, "pos -215 0 100% 100%");
+        setGlassPane(glassPanel);
         TimingTarget target = new TimingTargetAdapter() {
             @Override
             public void timingEvent(float fraction) {
@@ -51,7 +58,14 @@ public class Main extends javax.swing.JFrame {
                     alpha = 0;
                 }
                 menu.setAlpha(alpha);
-                mainPanel.revalidate();
+                menu.revalidate();
+            }
+
+            @Override
+            public void begin() {
+                getGlassPane().setVisible(true);
+                windowSnapshots.createSnapshot();
+                getContentPane().setVisible(false);
             }
 
             @Override
@@ -60,10 +74,15 @@ public class Main extends javax.swing.JFrame {
                 if (!menu.isShow()) {
                     menu.setVisible(false);
                 }
+                windowSnapshots.removeSnapshot();
+                getContentPane().setVisible(true);
             }
 
         };
-        animator = new Animator(200, target);
+        animator = new Animator(350, target);
+        animator.setDeceleration(0.5f);
+        animator.setAcceleration(0.5f);
+        animator.setResolution(1);
         menu.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent me) {
